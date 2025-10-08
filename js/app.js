@@ -2,7 +2,7 @@ const gameDimension =9;
 const activeSymbol = [null, "X", "O"];
 const activeDisplay =  []
 const axisLength = Math.sqrt(gameDimension) ;
-
+const gameOver =  false;
 
 
 /*Cached Variables */
@@ -15,9 +15,10 @@ sectionElement.style.gridTemplateColumns = "auto ".repeat(axisLength);
 const nextSymbol = (event)=>{
     selectedBox = event.target.id;
     boxId =  selectedBox.split("_")[1];
-    activeDisplay[boxId] = (activeDisplay[boxId] +1 )%3
+    activeDisplay[boxId] = 1;
     console.log(activeDisplay[boxId])
     event.target.textContent = activeSymbol[activeDisplay[boxId]];
+    event.target.style.pointerEvents = "none";
 }
 const lrCheck = ()=>{
     const increment = axisLength+1;
@@ -31,7 +32,7 @@ const lrCheck = ()=>{
     return true
 }
 
-//checking from the right corner going down to the let corner. do all the grids along that axis have a matching value
+//checking from the right corner going down to the left corner. do all the grids along that axis have a matching value
 const rlCheck = ()=>{
     const increment =  axisLength-1;
     for(let i = increment; i < gameDimension - increment; i+=increment){
@@ -61,35 +62,14 @@ const horizontalCheck = ()=>{
                 return [true, xborder];
             }
             xborder+=axisLength;
-            rowMatch = true
+            rowMatch = true;
         }
     }
-    return false
+    return false;
 }
 
 const verticalCheck = ()=>{
-
-    let yborder = 0;
-    // let axisSolution = false;
     let columnMatch = true;
-    // for(let i =axisLength; i < gameDimension-axisLength; i++){
-    //     // console.log(xborder)
-    //     if(i<xborder ){
-    //         if(rowMatch && activeDisplay[i]!==0){
-    //             // console.log(activeDisplay[i], activeDisplay[i-1],activeDisplay[i] === activeDisplay[i-1]);
-    //             rowMatch = activeDisplay[i] === activeDisplay[i-1];
-    //         }else{
-    //             rowMatch = false;
-    //         }
-    //     }else{
-    //         if(rowMatch){
-    //             return [true, xborder];
-    //         }
-    //         xborder+=axisLength;
-    //         rowMatch = true
-    //     }
-    // }
-    // return false
     let i =axisLength;
     let nextColIdx = i;
     while(nextColIdx < 2*axisLength){
@@ -116,27 +96,11 @@ const verticalCheck = ()=>{
     return false
 }
 const solutionCheck = ()=>{
-    // const xMoves = []
-    // const oMoves = []
-    // const emptySpaces = []
-    // activeDisplay.forEach((grid, index) => {
-    //     if(grid === 1){
-    //         xMoves.push(index);
-    //     }else if(grid === 2){
-    //         oMoves.push(index)
-    //     }else{
-    //         emptySpaces.push(index)
-    //     }
-    // })
     const lrdiagonal =  lrCheck();
     const rldiagonal = rlCheck();
     const row = horizontalCheck();
     const col =  verticalCheck();
-    // console.log(lrCheck());
-    // console.log(rlCheck());
-    // console.log(horizontalCheck());
-    // console.log(verticalCheck())
-    
+    const tie = activeDisplay.every(((value)=> value!== 0));
     if(lrdiagonal){
         resultElement.textContent=   `${activeSymbol[activeDisplay[0]]} won with a crushing blow on the left to right diagonal.`;
         let i = 0;
@@ -170,12 +134,43 @@ const solutionCheck = ()=>{
         let increment = -axisLength; 
         while(i>=0){
             document.querySelector(`#grid_${i}`).style.color = "red";
-            i+=increment
+            i+=increment;
         }
     }
+    
+    if(col[0] || row[0]|| lrdiagonal|| rldiagonal){
+        return true;
+    }else{
+        if(tie){
+            resultElement.textContent= `A hard fought battle with no clear victor, the result is a tie.`;
+            return true;
+        }
+        return false;
+    }
 
-    // console.log("these are x's moves", xMoves)
-    // activeDisplay.for
+}
+const computerTurn = ()=>{
+    const availableTiles = activeDisplay.map((symbol, index)=> index).filter((symbol)=> activeDisplay[symbol]===0)
+    // console.log(availableTiles);
+    const computerPlays = availableTiles[Math.floor(Math.random() * availableTiles.length)];
+    // console.log(document.querySelector(`#grid_${computerPlays}`))
+    
+    activeDisplay[computerPlays] = 2;
+    const playedTile = document.querySelector(`#grid_${computerPlays}`);
+    playedTile.textContent = activeSymbol[activeDisplay[computerPlays]];
+    playedTile.style.pointerEvents = "none";
+
+}
+
+const freezeGameState =()=>{
+    for(let i = 0; i < gameDimension; i++){
+        document.querySelector(`#grid_${i}`).style.pointerEvents ="none";
+    }
+}
+const unfreezeGameState= ()=>{
+    for(let i = 0; i < gameDimension; i++){
+        document.querySelector(`#grid_${i}`).style.pointerEvents ="auto";
+    }
 }
 const resetGameState = ()=>{
     resultElement.textContent = "";
@@ -185,7 +180,7 @@ const resetGameState = ()=>{
         gridElement.textContent ="";
         gridElement.style.color = "black";
     });
-
+    unfreezeGameState();
 }
 for(let i = 0; i < gameDimension; i++){
     const gridElement = document.createElement('div');
@@ -198,7 +193,14 @@ for(let i = 0; i < gameDimension; i++){
     gridElement.addEventListener("click",(event)=>{
         nextSymbol(event);
         // console.log("survives up to here");
-        solutionCheck();
+        if(solutionCheck() === false){
+            computerTurn();
+            if(solutionCheck()){
+                freezeGameState();
+            }
+        }else{
+            freezeGameState();
+        }
     } )
     
 }
@@ -206,3 +208,4 @@ refreshElement.addEventListener("click", ()=>{
     resetGameState();
 })
 
+computerTurn();
