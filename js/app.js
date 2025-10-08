@@ -1,8 +1,12 @@
+/* Constant */
 const gameDimension =9;
 const activeSymbol = [null, "X", "O"];
 const activeDisplay =  []
 const axisLength = Math.sqrt(gameDimension) ;
+const isThereP2 =  true;
 
+/*Variabless */
+let turn = 0;
 
 /*Cached Variables */
 const sectionElement = document.querySelector("section");
@@ -12,10 +16,10 @@ sectionElement.style.gridTemplateColumns = "auto ".repeat(axisLength);
 
 /*Functions */
 // the user changes a tile to their symbol
-const nextSymbol = (event)=>{
+const nextSymbol = (event, symbol)=>{
     selectedBox = event.target.id;
     boxId =  selectedBox.split("_")[1];
-    activeDisplay[boxId] = 1;
+    activeDisplay[boxId] = symbol;
     console.log(activeDisplay[boxId])
     event.target.textContent = activeSymbol[activeDisplay[boxId]];
     event.target.style.pointerEvents = "none";
@@ -76,13 +80,8 @@ const verticalCheck = ()=>{
     while(nextColIdx < 2*axisLength){
         // console.log(i)
         if(i<gameDimension-axisLength && columnMatch){
-            // if(columnMatch){
-                // console.log(activeDisplay[i] !== 0,activeDisplay[i] === activeDisplay[i-axisLength],activeDisplay[i]===activeDisplay[i+axisLength])
                 columnMatch = activeDisplay[i] !== 0 && activeDisplay[i] === activeDisplay[i-axisLength] && activeDisplay[i]===activeDisplay[i+axisLength];
                 i+=axisLength;
-            // }else{
-                // columnMatch =  false;
-            // }
         }else{
             if(columnMatch){
                 return [true, i]
@@ -91,8 +90,7 @@ const verticalCheck = ()=>{
                 i=nextColIdx;
                 columnMatch = true
             }
-        }
-        
+        }    
     }
     return false
 }
@@ -164,8 +162,8 @@ const computerTurn = ()=>{
     const playedTile = document.querySelector(`#grid_${computerPlays}`);
     playedTile.textContent = activeSymbol[activeDisplay[computerPlays]];
     playedTile.style.pointerEvents = "none";
-
 }
+
 //prevent user from changing selections
 const freezeGameState =()=>{
     for(let i = 0; i < gameDimension; i++){
@@ -181,6 +179,7 @@ const unfreezeGameState= ()=>{
 //reset the game
 const resetGameState = ()=>{
     resultElement.textContent = "";
+    turn = 0;
     activeDisplay.forEach((tile, index)=>{
         activeDisplay[index] = 0
         gridElement= document.querySelector(`#grid_${index}`);
@@ -188,7 +187,9 @@ const resetGameState = ()=>{
         gridElement.style.color = "black";
     });
     unfreezeGameState();
-    computerTurn();
+    if(!isThereP2){
+        computerTurn();
+    }
 }
 
 /* Event listeners */
@@ -201,13 +202,18 @@ for(let i = 0; i < gameDimension; i++){
     
     console.log(Math.sqrt(gameDimension))
     gridElement.addEventListener("click",(event)=>{
-        nextSymbol(event);
+        nextSymbol(event, turn+1);
         // console.log("survives up to here");
         if(solutionCheck() === false){
-            computerTurn();
-            if(solutionCheck()){
-                freezeGameState();
+            if(isThereP2==false){
+                computerTurn();
+                if(solutionCheck()){
+                    freezeGameState();
+                }
+            }else{
+                turn = (turn+1)%2
             }
+            
         }else{
             freezeGameState();
         }
@@ -218,4 +224,6 @@ refreshElement.addEventListener("click", ()=>{
     resetGameState();
 })
 
-computerTurn();
+if(!isThereP2){
+    computerTurn();
+}
