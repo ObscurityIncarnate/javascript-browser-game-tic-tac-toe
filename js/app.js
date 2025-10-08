@@ -1,5 +1,5 @@
 /* Constant */
-const gameDimension =16;
+const gameDimension =9;
 const activeSymbol = [null, "X", "O"];
 const activeDisplay =  []
 const axisLength = Math.floor(Math.sqrt(gameDimension)) ;
