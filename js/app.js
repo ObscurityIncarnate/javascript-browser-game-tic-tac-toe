@@ -1,9 +1,9 @@
 /* Constant */
-const gameDimension =9;
+const gameDimension =16;
 const activeSymbol = [null, "X", "O"];
 const activeDisplay =  []
-const axisLength = Math.sqrt(gameDimension) ;
-const isThereP2 =  true;
+const axisLength = Math.floor(Math.sqrt(gameDimension)) ;
+const isThereP2 =  false;
 
 /*Variabless */
 let turn = 0;
