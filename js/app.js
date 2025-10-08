@@ -1,18 +1,23 @@
 /* Constant */
-const gameDimension =9;
+
 const activeSymbol = [null, "X", "O"];
-const activeDisplay =  []
-const axisLength = Math.floor(Math.sqrt(gameDimension)) ;
-const isThereP2 =  false;
+
 
 /*Variabless */
+let activeDisplay =  [];
+let gameDimension =9;
 let turn = 0;
+let isThereP2 =  document.querySelector(`input[name="gametype"]:checked`).value === "true";
 
+let axisLength = Math.floor(Math.sqrt(gameDimension));
+// console.log(isThereP2)
 /*Cached Variables */
 const sectionElement = document.querySelector("section");
 const refreshElement = document.querySelector("#refresh")
 const resultElement  = document.querySelector("#outcome");
-sectionElement.style.gridTemplateColumns = "auto ".repeat(axisLength);
+const radioElement = document.querySelectorAll(`input[name="gametype"]`);
+const tileAmountElement = document.querySelector("#changeTileAmount");
+// sectionElement.style.gridTemplateColumns = "auto ".repeat(axisLength);
 
 /*Functions */
 // the user changes a tile to their symbol
@@ -183,47 +188,66 @@ const resetGameState = ()=>{
     activeDisplay.forEach((tile, index)=>{
         activeDisplay[index] = 0
         gridElement= document.querySelector(`#grid_${index}`);
-        gridElement.textContent ="";
-        gridElement.style.color = "black";
+        // gridElement.textContent ="";
+        // gridElement.style.color = "black";
+        gridElement.remove();
     });
-    unfreezeGameState();
+    populateGameTiles();
+    // unfreezeGameState();
     if(!isThereP2){
         computerTurn();
     }
 }
-
-/* Event listeners */
-for(let i = 0; i < gameDimension; i++){
-    const gridElement = document.createElement('div');
-    gridElement.id = `grid_${i}`
-    gridElement.classList.add("grid");
-    document.querySelector("section").appendChild(gridElement);
-    activeDisplay.push(0);
+const populateGameTiles = ()=>{
+    activeDisplay = [];
+    for(let i = 0; i < gameDimension; i++){
+        const gridElement = document.createElement('div');
+        gridElement.id = `grid_${i}`
+        gridElement.classList.add("grid");
+        sectionElement.appendChild(gridElement);
+        activeDisplay.push(0);
     
-    console.log(Math.sqrt(gameDimension))
-    gridElement.addEventListener("click",(event)=>{
-        nextSymbol(event, turn+1);
-        // console.log("survives up to here");
-        if(solutionCheck() === false){
-            if(isThereP2==false){
-                computerTurn();
-                if(solutionCheck()){
-                    freezeGameState();
+        console.log(Math.sqrt(gameDimension))
+        gridElement.addEventListener("click",(event)=>{
+            nextSymbol(event, turn+1);
+            // console.log("survives up to here");
+            if(solutionCheck() === false){
+                if(isThereP2==false){
+                    computerTurn();
+                    if(solutionCheck()){
+                        freezeGameState();
+                    }
+                }else{
+                    turn = (turn+1)%2
                 }
-            }else{
-                turn = (turn+1)%2
-            }
             
-        }else{
-            freezeGameState();
-        }
-    } )
+            }else{
+                freezeGameState();
+            }
+        } )
     
+    }
+    sectionElement.style.gridTemplateColumns = "auto ".repeat(axisLength);
 }
+/* Event listeners */
+
 refreshElement.addEventListener("click", ()=>{
     resetGameState();
 })
+radioElement.forEach((radio)=>{
+    radio.addEventListener("click", ()=>{
+        isThereP2 =  document.querySelector(`input[name="gametype"]:checked`).value === "true";
+        resetGameState();
+    })
+})
+tileAmountElement.addEventListener("click", ()=>{
+    gameDimension = Number( document.querySelector("#setDimension").value);
+    axisLength = Math.floor(Math.sqrt(gameDimension));
+    console.log(typeof gameDimension)
+    resetGameState();
+})
 
+populateGameTiles();
 if(!isThereP2){
     computerTurn();
 }
