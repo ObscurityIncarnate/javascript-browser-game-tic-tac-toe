@@ -114,7 +114,7 @@ const solutionCheck = ()=>{
         resultElement.textContent = `${activeSymbol[activeDisplay[axisLength-1]]} won with a crushing blow on the right to left diagonal.`;
         let i = axisLength-1;
         let increment =  axisLength-1; 
-        while(i<gameDimension){
+        while(i<gameDimension-1){
             document.querySelector(`#grid_${i}`).style.color = "red";
             i+=increment
         }
@@ -181,6 +181,7 @@ const resetGameState = ()=>{
         gridElement.style.color = "black";
     });
     unfreezeGameState();
+    computerTurn();
 }
 for(let i = 0; i < gameDimension; i++){
     const gridElement = document.createElement('div');
