@@ -2,7 +2,6 @@ const gameDimension =9;
 const activeSymbol = [null, "X", "O"];
 const activeDisplay =  []
 const axisLength = Math.sqrt(gameDimension) ;
-const gameOver =  false;
 
 
 /*Cached Variables */
@@ -12,6 +11,7 @@ const resultElement  = document.querySelector("#outcome");
 sectionElement.style.gridTemplateColumns = "auto ".repeat(axisLength);
 
 /*Functions */
+// the user changes a tile to their symbol
 const nextSymbol = (event)=>{
     selectedBox = event.target.id;
     boxId =  selectedBox.split("_")[1];
@@ -20,6 +20,7 @@ const nextSymbol = (event)=>{
     event.target.textContent = activeSymbol[activeDisplay[boxId]];
     event.target.style.pointerEvents = "none";
 }
+//checking from the left corner going down to the right corner. all the grids along that axis have a matching value
 const lrCheck = ()=>{
     const increment = axisLength+1;
     // console.log(increment)
@@ -67,7 +68,7 @@ const horizontalCheck = ()=>{
     }
     return false;
 }
-
+//checking if there is a solution along a vertical axis.
 const verticalCheck = ()=>{
     let columnMatch = true;
     let i =axisLength;
@@ -95,6 +96,8 @@ const verticalCheck = ()=>{
     }
     return false
 }
+
+//check if the game should be declared over
 const solutionCheck = ()=>{
     const lrdiagonal =  lrCheck();
     const rldiagonal = rlCheck();
@@ -149,6 +152,8 @@ const solutionCheck = ()=>{
     }
 
 }
+
+//the cpu adversary's play logic
 const computerTurn = ()=>{
     const availableTiles = activeDisplay.map((symbol, index)=> index).filter((symbol)=> activeDisplay[symbol]===0)
     // console.log(availableTiles);
@@ -161,17 +166,19 @@ const computerTurn = ()=>{
     playedTile.style.pointerEvents = "none";
 
 }
-
+//prevent user from changing selections
 const freezeGameState =()=>{
     for(let i = 0; i < gameDimension; i++){
         document.querySelector(`#grid_${i}`).style.pointerEvents ="none";
     }
 }
+//allow  for freee selection on reset
 const unfreezeGameState= ()=>{
     for(let i = 0; i < gameDimension; i++){
         document.querySelector(`#grid_${i}`).style.pointerEvents ="auto";
     }
 }
+//reset the game
 const resetGameState = ()=>{
     resultElement.textContent = "";
     activeDisplay.forEach((tile, index)=>{
@@ -183,13 +190,15 @@ const resetGameState = ()=>{
     unfreezeGameState();
     computerTurn();
 }
+
+/* Event listeners */
 for(let i = 0; i < gameDimension; i++){
     const gridElement = document.createElement('div');
     gridElement.id = `grid_${i}`
     gridElement.classList.add("grid");
     document.querySelector("section").appendChild(gridElement);
     activeDisplay.push(0);
-    /* Event listener */
+    
     console.log(Math.sqrt(gameDimension))
     gridElement.addEventListener("click",(event)=>{
         nextSymbol(event);
